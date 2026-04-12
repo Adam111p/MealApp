@@ -1,0 +1,64 @@
+.quantity-selector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px;
+  margin: 20px 0;
+
+  .label {
+    width: 10em;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    .quantity-value {
+      font-size: 1.9rem;
+      font-weight: 700;
+      min-width: 30px;
+      text-align: center;
+    }
+  }
+
+  .subtotal {
+    width: 10em;
+    text-align: right;
+    font-size: 1.1rem;
+    strong {
+      color: #2e7d32;
+    }
+  }
+}
+.hero-image {
+  width: 10em;
+  margin-left: -20px;
+  margin-top: -20px;
+  padding-top: -10px;
+
+  mask-image: radial-gradient(
+    circle at center,
+    black 0%,
+    black 30%,
+    rgba(0, 0, 0, 0.1) 63%,
+    rgba(0, 0, 0, 0) 75%,
+    transparent 100%
+  );
+
+  -webkit-mask-image: radial-gradient(
+    circle at center,
+    black 0%,
+    black 30%,
+    rgba(0, 0, 0, 0.1) 63%,
+    rgba(0, 0, 0, 0) 75%,
+    transparent 100%
+  );
+
+  border-radius: 20px 20px 0 0;
+}
+.header-detail {
+  display: flex;
+}

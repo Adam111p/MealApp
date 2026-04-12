@@ -1,0 +1,60 @@
+<mat-card class="client-card">
+  <form [formGroup]="clientForm" (ngSubmit)="save()" class="styled-form">
+    <header class="form-header">
+      <h2>Dane podstawowe</h2>
+      <p class="subtitle">Wprowadź informacje kontaktowe klienta</p>
+    </header>
+
+    <div class="form-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Imię</mat-label>
+        <input matInput formControlName="firstName" placeholder="np. Jan" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Nazwisko</mat-label>
+        <input matInput formControlName="lastName" placeholder="np. Kowalski" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Telefon</mat-label>
+        <mat-icon matPrefix>phone</mat-icon>
+        <input matInput formControlName="tel" type="tel" placeholder="000 000 000" />
+      </mat-form-field>
+    </div>
+
+    <div class="section-divider">
+      <mat-divider></mat-divider>
+      <h3>Adres zamieszkania</h3>
+    </div>
+
+    <ma-address-form [addressGroup]="getAddressGroup('address')"></ma-address-form>
+
+    <div class="checkbox-wrapper">
+      <mat-checkbox color="primary" [checked]="specialAddressOrder()" (change)="toggleOrderAddress($event.checked)">
+        Inny adres zamówienia?
+      </mat-checkbox>
+    </div>
+
+    @if (specialAddressOrder()) {
+      <div class="extra-address" [@fadeIn]> <div class="section-divider">
+          <mat-divider></mat-divider>
+          <h3>Adres zamówienia</h3>
+        </div>
+        <ma-address-form [addressGroup]="getAddressGroup('orderAddress')"></ma-address-form>
+      </div>
+    }
+
+    <footer class="form-actions">
+      <button mat-flat-button color="primary" type="submit" [disabled]="clientForm.invalid">
+        <mat-icon>save</mat-icon>
+        Zapisz klienta
+      </button>
+    </footer>
+  </form>
+
+  <details class="debug-panel">
+    <summary>Podgląd JSON</summary>
+    <pre>{{ clientForm.value | json }}</pre>
+  </details>
+</mat-card>

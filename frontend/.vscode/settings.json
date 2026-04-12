@@ -1,0 +1,21 @@
+{
+  "workbench.colorCustomizations": {
+    // Pasek tytułu - elegancki Indigo
+    "titleBar.activeBackground": "#3f51b5",
+    "titleBar.activeForeground": "#ffffff",
+    "titleBar.inactiveBackground": "#303f9f",
+
+    // Pasek boczny - ciemniejszy odcień dla kontrastu
+    "activityBar.background": "#283593",
+    "activityBar.foreground": "#ffffff",
+    "activityBar.inactiveForeground": "#9fa8da",
+    "activityBar.badgeBackground": "#ff4081", // Akcent Pink (powiadomienia)
+
+    // Pasek stanu na dole
+    "statusBar.background": "#303f9f",
+    "statusBar.foreground": "#ffffff",
+
+    // Opcjonalnie: subtelne obramowanie, by oddzielić okna
+    "window.activeBorder": "#3f51b5"
+  }
+}

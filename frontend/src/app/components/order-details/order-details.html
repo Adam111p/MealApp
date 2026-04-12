@@ -1,0 +1,43 @@
+<div class="dialog-container">
+  <div class="header-detail">
+    <img [src]="'images/' + data.fileName" class="hero-image" />
+    <h2 mat-dialog-title>{{ data.name }}</h2>
+  </div>
+
+  <mat-dialog-content>
+    <p class="desc">{{ data.description }}</p>
+    <h4 style="margin-top: 20px; font-weight: 600">Dodatki/Przyprawy:</h4>
+    <div class="spices-grid">
+      @for (s of menuService.getSpicesDictByType(data.typeDish); track s.id) {
+        <mat-checkbox [checked]="isChecked(s)" (change)="toggleSpice(s)" color="primary">
+          {{ s.name }} (Moc: {{ s.levelSpice }}/5)
+        </mat-checkbox>
+      }
+    </div>
+
+    <p class="price">{{ data.price }} PLN</p>
+  </mat-dialog-content>
+
+  <div class="quantity-selector">
+    <span class="label">Ilość:</span>
+    <div class="controls">
+      <button mat-icon-button (click)="changeQuantity(-1)" [disabled]="quantity() < 1">
+        <mat-icon>remove_circle_outline</mat-icon>
+      </button>
+
+      <span class="quantity-value">{{ quantity() }}</span>
+
+      <button mat-icon-button (click)="changeQuantity(1)">
+        <mat-icon>add_circle_outline</mat-icon>
+      </button>
+    </div>
+
+    <div class="subtotal">
+      Suma: <strong>{{ data.price * quantity() }} PLN</strong>
+    </div>
+  </div>
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="dialogRef.close()">Anuluj</button>
+    <button mat-flat-button color="primary" (click)="confirm()">DODAJ DO ZAMÓWIENIA</button>
+  </mat-dialog-actions>
+</div>

@@ -1,0 +1,33 @@
+<div class="menu-container">
+  <h1 class="mat-display-1">Karta Dań</h1>
+
+  <div class="menu-grid">
+    @for (dish of menuService.menuItems(); track dish.id) {
+      <mat-card class="dish-card">
+        <img
+          mat-card-image
+          [src]="'images/' + dish.fileName"
+          [alt]="dish.name"
+          class="dish-image"
+        />
+        <mat-card-header>
+          <mat-card-title>{{ dish.name }}</mat-card-title>
+          <mat-card-subtitle>Kuchnia Włoska</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <p>{{ dish.description }}</p>
+          <mat-chip-set>
+            <mat-chip>{{ dish.price }} PLN</mat-chip>
+          </mat-chip-set>
+        </mat-card-content>
+
+        <mat-card-actions align="end">
+          <button mat-flat-button color="primary" (click)="openDetails(dish)">
+            <mat-icon>add_shopping_cart</mat-icon> DODAJ
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    }
+  </div>
+</div>

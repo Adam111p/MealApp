@@ -1,0 +1,16 @@
+<div [formGroup]="addressGroup" class="address-container">
+  <mat-form-field appearance="outline">
+    <mat-label>Ulica</mat-label>
+    <input matInput formControlName="street" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Miasto</mat-label>
+    <input matInput formControlName="city" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Kod pocztowy</mat-label>
+    <input matInput formControlName="postCode" />
+  </mat-form-field>
+</div>

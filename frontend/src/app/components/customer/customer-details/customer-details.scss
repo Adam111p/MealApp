@@ -1,0 +1,95 @@
+.client-card {
+  max-width: 650px;
+  margin: 40px auto;
+  padding: 32px !important;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+  border: 1px solid #e0e0e0;
+}
+
+.styled-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .form-header {
+    margin-bottom: 8px;
+    h2 {
+      margin: 0;
+      color: #1a1a1a;
+      font-weight: 600;
+    }
+    .subtitle {
+      color: #666;
+      font-size: 0.9rem;
+      margin: 4px 0 0;
+    }
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; // Dwie kolumny
+    gap: 12px;
+
+    @media (max-width: 480px) {
+      grid-template-columns: 1fr; // Na komórkach jedna pod drugą
+    }
+
+    .full-width {
+      grid-column: span 2;
+      @media (max-width: 480px) { grid-column: span 1; }
+    }
+  }
+
+  .section-divider {
+    margin: 24px 0 8px;
+    h3 {
+      margin: 16px 0 8px;
+      font-size: 1.1rem;
+      color: #444;
+      font-weight: 500;
+    }
+  }
+
+  .checkbox-wrapper {
+    padding: 12px 0;
+  }
+
+  .form-actions {
+    margin-top: 32px;
+    display: flex;
+    justify-content: flex-end;
+
+    button {
+      padding: 8px 24px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      
+      mat-icon { margin-right: 8px; }
+    }
+  }
+}
+
+// Styl dla debuggera
+.debug-panel {
+  margin-top: 24px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  
+  summary {
+    padding: 8px 16px;
+    cursor: pointer;
+    color: #888;
+    font-size: 0.8rem;
+    outline: none;
+  }
+
+  pre {
+    margin: 0;
+    padding: 16px;
+    font-size: 12px;
+    overflow-x: auto;
+    color: #d81b60; // Ładny kolor dla kluczy JSON
+  }
+}
