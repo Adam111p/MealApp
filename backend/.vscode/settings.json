@@ -1,0 +1,21 @@
+{
+  "workbench.colorCustomizations": {
+    // Pasek tytułu - klasyczny błękit Gophera
+    "titleBar.activeBackground": "#00ADD8",
+    "titleBar.activeForeground": "#FFFFFF",
+    "titleBar.inactiveBackground": "#0083a3",
+
+    // Pasek boczny (Activity Bar) - ciemniejszy odcień "Cyan"
+    "activityBar.background": "#0091b5",
+    "activityBar.foreground": "#FFFFFF",
+    "activityBar.inactiveForeground": "#bbeffb",
+    
+    // Pasek stanu - granat nawiązujący do korporacyjnego logo Go
+    "statusBar.background": "#007d9c",
+    "statusBar.foreground": "#FFFFFF",
+
+    // Akcenty
+    "activityBar.badgeBackground": "#CE3262", // Kolor "Gopher Pink" dla kontrastu
+    "statusBarItem.remoteBackground": "#00ADD8"
+  }
+}
