@@ -1,0 +1,4 @@
+frontend/.angular
+frontend/node_modules
+backend/backend
+backend/LocalTesBase.db
