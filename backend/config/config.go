@@ -17,6 +17,9 @@ type Config struct {
 	TypeBase struct {
 		Type string `mapstructure:"type"`
 	} `mapstructure:"baseType"`
+	Gemini struct {
+		ApiKey string `mapstructure:"apiKey"`
+	} `mapstructure:"gemini"`
 }
 type BaseType int
 
