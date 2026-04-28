@@ -14,12 +14,20 @@ export class MenuService {
   // initialValue zapewnia, że nie dostaniemy błędu przy starcie
   menuItems = toSignal(this.http.get<Dish[]>(this.apiUrl + '/menu'), { initialValue: [] });
   spicesDict = signal<Spice[]>([]);
+  dishes = signal<Dish[] >([]);
   getSpicesDictByType(type: string) {
     return this.spicesDict().filter((s) => s.typeDish === type);
   }
   loadSpices() {
     this.http.get<Spice[]>(this.apiUrl + '/spices').subscribe((data) => {
       this.spicesDict.set(data);
+    });
+  }
+
+  searchDishes(query: string) {
+    this.http.get<Dish[]>(this.apiUrl + '/searchDishes?query=' + query)
+    .subscribe((data) => {
+      this.dishes.set(data);
     });
   }
 }

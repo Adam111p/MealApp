@@ -10,6 +10,7 @@ import (
 	"github.com/pgvector/pgvector-go"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 var DB *gorm.DB
@@ -138,6 +139,7 @@ func Seed() {
 	}
 
 }
+
 func createDish(name string, price float64, description string, fileName string, typeDish string, toppings []models.DishTopping) models.Dish {
 
 	var values, error = geminiApi.GetEmbedding(Cfg.Gemini.ApiKey, description)
@@ -155,4 +157,25 @@ func createDish(name string, price float64, description string, fileName string,
 		Embedding:    pgvector.NewVector(values),
 	}
 	return dish
+}
+func SearchByDesc(description string) []models.Dish {
+	var dishesSearch []models.Dish
+	var queryVector, err = geminiApi.GetEmbedding(Cfg.Gemini.ApiKey, description)
+	if err != nil {
+		panic(fmt.Errorf("Błąd pobierania embeddingu: %v", err))
+	}
+	threshold := 0.4
+	err = DB.Clauses(clause.OrderBy{
+		Expression: clause.Expr{
+			SQL:  "embedding <=> ?",
+			Vars: []interface{}{pgvector.NewVector(queryVector)},
+		},
+	}).
+		Where("embedding <=> ? < ?", pgvector.NewVector(queryVector), threshold).
+		Limit(5).Find(&dishesSearch).Error
+
+	if err != nil {
+		panic(fmt.Errorf("DB failed: %v", err))
+	}
+	return dishesSearch
 }

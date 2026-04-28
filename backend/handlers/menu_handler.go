@@ -22,3 +22,14 @@ func GetSpices(c *gin.Context) {
 
 	c.JSON(http.StatusOK, spice)
 }
+
+func SearchMenu(c *gin.Context) {
+	searchTerm := c.Query("query")
+	if searchTerm == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Query is empty"})
+		return
+	}
+	dishesSearch := database.SearchByDesc(searchTerm)
+	c.JSON(http.StatusOK, dishesSearch)
+
+}

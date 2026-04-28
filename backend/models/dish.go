@@ -15,7 +15,7 @@ type Dish struct {
 	TypeDish     string          `json:"typeDish"`
 	Type         DishType        `gorm:"foreignKey:TypeDish;references:Name"`
 	DishToppings []DishTopping   `json:"toppings"`
-	Embedding    pgvector.Vector `gorm:"type:vector(768)"`
+	Embedding    pgvector.Vector `gorm:"type:vector(768)" json:"-"`
 }
 type DishTopping struct {
 	Topping   Topping `json:"topping" gorm:"foreignKey:ToppingID"`
