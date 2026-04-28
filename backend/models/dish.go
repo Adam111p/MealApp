@@ -7,7 +7,7 @@ import (
 
 type Dish struct {
 	gorm.Model
-	ID           int             `json:"id" gorm:"primary_key;autoIncrement"`
+	ID           int             `json:"id" gorm:"primaryKey;autoIncrement"`
 	Name         string          `gorm:"unique;not null" json:"name"`
 	Price        float64         `json:"price"`
 	Description  string          `json:"description"`
@@ -32,8 +32,8 @@ type Topping struct {
 }
 type Spices struct {
 	gorm.Model
-	ID          int      `json:"id" gorm:"primary_key;autoIncrement"`
-	Name        string   `gorm:not null" json:"name"`
+	ID          int      `json:"id" gorm:"primaryKey;autoIncrement"`
+	Name        string   `gorm:"not null" json:"name"`
 	LevelSpice  int      `json:"levelSpice"`
 	Description string   `json:"description"`
 	TypeDish    string   `json:"typeDish"`

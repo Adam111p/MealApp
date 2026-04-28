@@ -2,10 +2,9 @@ package database
 
 import (
 	"fmt"
-	"math/rand"
 	"meal-order-app/backend/config"
+	geminiApi "meal-order-app/backend/gemini"
 	"meal-order-app/backend/models"
-	"time"
 
 	"github.com/glebarez/sqlite"
 	"github.com/pgvector/pgvector-go"
@@ -14,8 +13,10 @@ import (
 )
 
 var DB *gorm.DB
+var Cfg config.Config
 
 func InitDB(cfg config.Config) {
+	Cfg = cfg
 	var db *gorm.DB
 	var err error
 
@@ -82,24 +83,38 @@ func Seed() {
 		DB.FirstOrCreate(&top, models.Topping{Name: top.Name})
 		createdToppings[top.Name] = top
 	}
-	GenerateRandomVector(768)
+
 	dishes := []models.Dish{
-		{Name: "Pizza", Price: 35.0, Description: "Pyszna", FileName: "pizza.jpeg", TypeDish: "PIZZA",
-			DishToppings: []models.DishTopping{
-				{Topping: createdToppings["Ser Mozzarella"], Quantity: 1},
-				{Topping: createdToppings["Sos Czosnkowy"], Quantity: 1},
-			}, Embedding: GenerateRandomVector(768),
-		},
-		{Name: "Pasta", Price: 42.0, Description: "Włoska", FileName: "spagetti.jpeg", TypeDish: "PASTA",
-			DishToppings: []models.DishTopping{}, Embedding: GenerateRandomVector(768),
-		},
-		{Name: "Pizza Margherita", Price: 35.00, Description: "Klasyk", FileName: "pizza.jpeg", TypeDish: "PIZZA", Embedding: GenerateRandomVector(768)},
-		{Name: "Pasta Carbonara", Price: 42.50, Description: "Bez śmietany", FileName: "spagetti.jpeg", TypeDish: "PASTA", Embedding: GenerateRandomVector(768)},
-		{Name: "Sałatka Cezar", Price: 29.00, Description: "Z kurczakiem",
-			FileName: "cezar.jpeg", TypeDish: "SALATKA", DishToppings: []models.DishTopping{
-				{Topping: createdToppings["Cebula"], Quantity: 1},
-				{Topping: createdToppings["Boczek"]},
-			}, Embedding: GenerateRandomVector(768)},
+		createDish("Pizza", 35.0, "Klasyczna włoska pizza na cienkim cieście z autorskim sosem pomidorowym, świeżą bazylią i nutą oliwy z oliwek", "pizza.jpeg", "PIZZA", []models.DishTopping{
+			{Topping: createdToppings["Ser Mozzarella"], Quantity: 1},
+			{Topping: createdToppings["Sos Czosnkowy"], Quantity: 1},
+		}),
+		createDish("Pasta", 42.0, "Tradycyjny makaron pszenny podawany z kremowym sosem, aromatycznym czosnkiem i kompozycją świeżo mielonych ziół", "spagetti.jpeg", "PASTA", []models.DishTopping{
+			{Topping: createdToppings["Ser Mozzarella"], Quantity: 1},
+			{Topping: createdToppings["Sos Czosnkowy"], Quantity: 1},
+		}),
+		createDish("Sałatka", 29.0, "Lekka i pożywna kompozycja chrupiących warzyw sezonowych, mixu sałat oraz aromatycznych dodatków z domowym vinegretem", "cezar.jpeg", "SALATKA", []models.DishTopping{
+			{Topping: createdToppings["Cebula"], Quantity: 1},
+			{Topping: createdToppings["Boczek"], Quantity: 1},
+		}),
+		createDish("Pizza Pepperoni", 40.0, "Pikantna uczta dla fanów wyrazistych smaków: plastry dojrzewającego pepperoni na grubym pokładzie ciągnącego sera", "pizza_pepperoni.jpeg", "PIZZA", []models.DishTopping{
+			{Topping: createdToppings["Ser Mozzarella"], Quantity: 1},
+			{Topping: createdToppings["Papryczki Jalapeño"], Quantity: 1},
+		}),
+		createDish("Pasta Bolognese", 45.0, "Sycące spaghetti z wolno gotowanym sosem mięsno-pomidorowym według oryginalnej receptury z Bolonii", "pasta_bolognese.jpeg", "PASTA", []models.DishTopping{
+			{Topping: createdToppings["Ser Mozzarella"], Quantity: 1},
+			{Topping: createdToppings["Sos Czosnkowy"], Quantity: 1},
+		}),
+		createDish("Sałatka Grecka", 27.0, "Świeże ogórki, dojrzałe pomidory, słona feta i czarne oliwki, skąpane w aromatycznym oregano i oliwie", "salatka_grecka.jpeg", "SALATKA", []models.DishTopping{
+			{Topping: createdToppings["Cebula"], Quantity: 1},
+			{Topping: createdToppings["Papryczki Jalapeño"], Quantity: 1},
+		}),
+		createDish("Pizza Margherita", 27.0, "Królowa prostoty: idealna harmonia czerwonych pomidorów, białej mozzarelli i zielonej, świeżej bazylii", "pizza.jpeg", "PIZZA", []models.DishTopping{}),
+		createDish("Pasta Carbonara", 42.50, "Prawdziwie rzymski smak: sos na bazie żółtek jaj, twardego sera i chrupiącego boczku bez dodatku śmietany", "spagetti.jpeg", "PASTA", []models.DishTopping{}),
+		createDish("Sałatka Cezar", 29.00, "Kultowa sałata rzymska z soczystym grillowanym kurczakiem, kruchymi grzankami i charakterystycznym sosem parmezanowym", "cezar.jpeg", "SALATKA", []models.DishTopping{
+			{Topping: createdToppings["Cebula"], Quantity: 1},
+			{Topping: createdToppings["Boczek"], Quantity: 1},
+		}),
 	}
 	for _, d := range dishes {
 		DB.FirstOrCreate(&d, models.Dish{Name: d.Name})
@@ -123,16 +138,21 @@ func Seed() {
 	}
 
 }
-func GenerateRandomVector(dim int) pgvector.Vector {
-	// Inicjalizacja ziarna (seed), aby za każdym razem były inne liczby
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+func createDish(name string, price float64, description string, fileName string, typeDish string, toppings []models.DishTopping) models.Dish {
 
-	vec := make([]float32, dim)
-	for i := range vec {
-		// rand.Float32() zwraca liczbę od 0.0 do 1.0
-		// Jeśli chcesz zakres od -1.0 do 1.0, użyj: r.Float32()*2 - 1
-		vec[i] = r.Float32()
+	var values, error = geminiApi.GetEmbedding(Cfg.Gemini.ApiKey, description)
+	if error != nil {
+		panic(fmt.Errorf("Błąd pobierania embeddingu: %v", error))
 	}
 
-	return pgvector.NewVector(vec)
+	dish := models.Dish{
+		Name:         name,
+		Price:        price,
+		Description:  description,
+		FileName:     fileName,
+		TypeDish:     typeDish,
+		DishToppings: toppings,
+		Embedding:    pgvector.NewVector(values),
+	}
+	return dish
 }
