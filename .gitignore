@@ -3,5 +3,4 @@ frontend/node_modules
 backend/backend
 backend/LocalTesBase.db
 backend/config/ConfigApp.yml
-
-backend/__debug_bin1628853977
+backend/*_debug_*
