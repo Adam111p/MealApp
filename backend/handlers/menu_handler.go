@@ -11,7 +11,7 @@ import (
 // GetMenu zwraca listę dostępnych dań
 func GetMenu(c *gin.Context) {
 	var dishes []models.Dish
-	database.DB.Find(&dishes)
+	database.DB.Preload("DishToppings.Topping").Find(&dishes)
 
 	c.JSON(http.StatusOK, dishes)
 }

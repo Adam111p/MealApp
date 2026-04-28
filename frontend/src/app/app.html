@@ -1,7 +1,8 @@
 <mat-toolbar color="primary" class="main-header">
   <mat-icon>restaurant_menu</mat-icon>
   <span>MealApp</span>
-  <span class="spacer"></span>
+  <span class="spacer">{{ title()}}</span>
+
   <button mat-icon-button (click)="showBasket()">
     @if (basketService.count() > 0) {
       <mat-icon [matBadge]="basketService.count()">shopping_cart</mat-icon>

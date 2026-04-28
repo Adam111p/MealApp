@@ -1,6 +1,7 @@
 package main
 
 import (
+	"meal-order-app/backend/config"
 	"meal-order-app/backend/database"
 	"meal-order-app/backend/handlers"
 
@@ -9,7 +10,10 @@ import (
 
 func main() {
 	r := gin.Default()
-	database.InitDB()
+
+	conf := config.LoadConf()
+
+	database.InitDB(conf)
 	// Grupowanie tras sprawia, że kod jest czytelny
 	api := r.Group("/api")
 	{
