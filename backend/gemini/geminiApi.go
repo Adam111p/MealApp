@@ -84,7 +84,6 @@ func AnalyzeIntentWithGemini(ctx context.Context, apiKey string, userInput strin
 		return nil, err
 	}
 
-	// Przygotowanie listy tagów jako string
 	tagsList := strings.Join(availableTags, ", ")
 
 	// Budowanie "System Promptu"
@@ -95,7 +94,7 @@ func AnalyzeIntentWithGemini(ctx context.Context, apiKey string, userInput strin
 		
 		ZASADY:
 		1. Wyodrębnij słowa kluczowe do wyszukiwania wektorowego (clean_query).
-		2. Jeśli użytkownik wskazuje preferencje (np. "wege", "ostre"), dodaj tagi do "tags".
+		2. Jeśli użytkownik wskazuje preferencje , składniki , typ dania (np. "wege", "ostre", "pomidory" ,"kebab"), dodaj tagi do "tags".
 		3. Używaj możliwie tagów z listy DOSTĘPNE TAGI, jeżeli to koniecznie dodaj nowe.
 		
 		ZAPYTANIE UŻYTKOWNIKA: "%s"
@@ -106,7 +105,7 @@ func AnalyzeIntentWithGemini(ctx context.Context, apiKey string, userInput strin
 		ResponseMIMEType: "application/json",
 	}
 
-	result, err := client.Models.GenerateContent(ctx, "gemini-3-flash-preview", genai.Text(prompt), config)
+	result, err := client.Models.GenerateContent(ctx, "gemini-3.1-flash-lite-preview", genai.Text(prompt), config)
 	if err != nil {
 		return nil, err
 	}
@@ -146,10 +145,11 @@ func AnalyzeSearchIntentWithGemini(ctx context.Context, apiKey string, userInput
 		
 		ZASADY:
 		1. Wyodrębnij słowa kluczowe do wyszukiwania wektorowego (clean_query).
-		2. Jeśli użytkownik wskazuje preferencje (np. "wege", "ostre" ,"Mięsna"), dodaj tagi do "tags".
+		2. Jeśli użytkownik wskazuje preferencje , składniki , typ dania (np. "wege", "ostre", "pomidory" ,"kebab"), dodaj tagi do "tags".
 		3. Jeśli użytkownik wskazuje że czegoś nie chce (np. "nie chce mięsa"), dodaj tagi do "withoutTags".
-		4. Używaj możliwie tagów z listy DOSTĘPNE TAGI.
-		5. jeżeli wspomni o cenie to takie to do 30 zł a bardzo drogie to powyżej 100 zł dodaj kwotę do "maxPrice"
+		4. Używaj tagów z listy DOSTĘPNE TAGI
+		5. kreatywnie dopasuj tagi np. jeżeli jest ptak w zdaniu,a DOSTĘPNE TAGI to "kurczak" użyj tagu kurczak.
+		6. jeżeli wspomni o cenie to takie to do 30 zł a bardzo drogie to powyżej 100 zł dodaj kwotę do "maxPrice"
 		ZAPYTANIE UŻYTKOWNIKA: "%s"
 	`, tagsList, userInput)
 
@@ -158,7 +158,7 @@ func AnalyzeSearchIntentWithGemini(ctx context.Context, apiKey string, userInput
 		ResponseMIMEType: "application/json",
 	}
 
-	result, err := client.Models.GenerateContent(ctx, "gemini-3-flash-preview", genai.Text(prompt), config)
+	result, err := client.Models.GenerateContent(ctx, "gemini-3.1-flash-lite-preview", genai.Text(prompt), config)
 	if err != nil {
 		return nil, err
 	}

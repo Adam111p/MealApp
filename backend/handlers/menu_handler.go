@@ -29,7 +29,7 @@ func SearchMenu(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Query is empty"})
 		return
 	}
-	dishesSearch := database.SearchByDesc(searchTerm)
+	dishesSearch := database.SearchByDesc(searchTerm, c)
 	c.JSON(http.StatusOK, dishesSearch)
 
 }

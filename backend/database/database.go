@@ -6,7 +6,9 @@ import (
 	"meal-order-app/backend/config"
 	geminiApi "meal-order-app/backend/gemini"
 	"meal-order-app/backend/models"
+	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/glebarez/sqlite"
 	"github.com/lib/pq"
 	"github.com/pgvector/pgvector-go"
@@ -17,11 +19,13 @@ import (
 
 var DB *gorm.DB
 var Cfg config.Config
+var ctx context.Context
 
 func InitDB(cfg config.Config) {
 	Cfg = cfg
 	var db *gorm.DB
 	var err error
+	ctx = context.Background()
 
 	dbType := config.ParseBaseType(cfg.TypeBase.Type)
 
@@ -87,6 +91,12 @@ func Seed() {
 		createdToppings[top.Name] = top
 	}
 
+	var count int64
+	DB.Model(&models.Dish{}).Where("name = ?", "Pizza").Count(&count)
+	if count > 0 {
+		return
+	}
+
 	dishes := []models.Dish{
 		createDish("Pizza", 35.0, "Klasyczna włoska pizza na cienkim cieście z autorskim sosem pomidorowym, świeżą bazylią i nutą oliwy z oliwek", "pizza.jpeg", "PIZZA", []models.DishTopping{
 			{Topping: createdToppings["Ser Mozzarella"], Quantity: 1},
@@ -148,10 +158,27 @@ func createDish(name string, price float64, description string, fileName string,
 	if err != nil {
 		panic(fmt.Errorf("Błąd pobierania tagów: %v", err))
 	}
+	maxRetries := 5
+	var tags *geminiApi.SearchIntent
+	var erro error
 
-	var tags, erro = geminiApi.AnalyzeIntentWithGemini(context.Background(), Cfg.Gemini.ApiKey, description, currentTags)
-	if erro != nil {
-		panic(fmt.Errorf("Błąd generowania tagów: %v", erro))
+	for i := 0; i < maxRetries; i++ {
+		tags, erro = geminiApi.AnalyzeIntentWithGemini(ctx, Cfg.Gemini.ApiKey, name+" "+description, currentTags)
+
+		if erro == nil {
+			break // Sukces, wychodzimy z pętli
+		}
+
+		// Wyświetlamy błąd w logach, żeby wiedzieć co się dzieje
+		fmt.Printf("Próba %d/%d nieudana: %v\n", i+1, maxRetries, erro)
+
+		if i < maxRetries-1 {
+			fmt.Println("Czekam 10 sekund przed kolejną próbą...")
+			time.Sleep(10 * time.Second)
+		} else {
+			// Jeśli to była ostatnia próba i nadal jest błąd — wtedy panic
+			panic(fmt.Errorf("Błąd generowania tagów po %d próbach: %v", maxRetries, erro))
+		}
 	}
 	var values, error = geminiApi.GetEmbedding(Cfg.Gemini.ApiKey, tags.CleanQuery)
 	if error != nil {
@@ -170,13 +197,13 @@ func createDish(name string, price float64, description string, fileName string,
 	}
 	return dish
 }
-func SearchByDesc(description string) []models.Dish {
+func SearchByDesc(description string, c *gin.Context) []models.Dish {
 	var dishesSearch []models.Dish
 	currentTags, err1 := GetUniqueTags()
 	if err1 != nil {
 		panic(fmt.Errorf("Błąd pobierania tagów: %v", err1))
 	}
-	var tags, errG = geminiApi.AnalyzeSearchIntentWithGemini(context.Background(), Cfg.Gemini.ApiKey, description, currentTags)
+	var tags, errG = geminiApi.AnalyzeSearchIntentWithGemini(c, Cfg.Gemini.ApiKey, description, currentTags)
 	if errG != nil {
 		panic(fmt.Errorf("Błąd generowania zapytania json: %v", errG))
 	}
@@ -196,12 +223,12 @@ func SearchByDesc(description string) []models.Dish {
 		// NOT (tags && ...) oznacza: "nie ma żadnego z tych tagów"
 		query = query.Where("NOT (tags && ?)", pq.StringArray(tags.WithoutTags))
 	}
-
-	threshold := 0.4
+	searchTags := pq.StringArray(tags.Tags)
+	threshold := 0.6
 	err = query.Clauses(clause.OrderBy{
 		Expression: clause.Expr{
-			SQL:  "embedding <=> ?",
-			Vars: []interface{}{pgvector.NewVector(queryVector)},
+			SQL:  `(embedding <=> ?) - (0.1 * (SELECT count(*) FROM unnest(tags) as t WHERE t = ANY(?::text[])))`,
+			Vars: []interface{}{pgvector.NewVector(queryVector), searchTags},
 		},
 	}).
 		Where("embedding <=> ? < ?", pgvector.NewVector(queryVector), threshold).
