@@ -1,12 +1,14 @@
 package database
 
 import (
+	"context"
 	"fmt"
 	"meal-order-app/backend/config"
 	geminiApi "meal-order-app/backend/gemini"
 	"meal-order-app/backend/models"
 
 	"github.com/glebarez/sqlite"
+	"github.com/lib/pq"
 	"github.com/pgvector/pgvector-go"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -142,11 +144,20 @@ func Seed() {
 
 func createDish(name string, price float64, description string, fileName string, typeDish string, toppings []models.DishTopping) models.Dish {
 
-	var values, error = geminiApi.GetEmbedding(Cfg.Gemini.ApiKey, description)
+	currentTags, err := GetUniqueTags()
+	if err != nil {
+		panic(fmt.Errorf("Błąd pobierania tagów: %v", err))
+	}
+
+	var tags, erro = geminiApi.AnalyzeIntentWithGemini(context.Background(), Cfg.Gemini.ApiKey, description, currentTags)
+	if erro != nil {
+		panic(fmt.Errorf("Błąd generowania tagów: %v", erro))
+	}
+	var values, error = geminiApi.GetEmbedding(Cfg.Gemini.ApiKey, tags.CleanQuery)
 	if error != nil {
 		panic(fmt.Errorf("Błąd pobierania embeddingu: %v", error))
 	}
-
+	fmt.Println("tags %s error %s", tags, erro)
 	dish := models.Dish{
 		Name:         name,
 		Price:        price,
@@ -154,28 +165,59 @@ func createDish(name string, price float64, description string, fileName string,
 		FileName:     fileName,
 		TypeDish:     typeDish,
 		DishToppings: toppings,
+		Tags:         tags.Tags,
 		Embedding:    pgvector.NewVector(values),
 	}
 	return dish
 }
 func SearchByDesc(description string) []models.Dish {
 	var dishesSearch []models.Dish
-	var queryVector, err = geminiApi.GetEmbedding(Cfg.Gemini.ApiKey, description)
+	currentTags, err1 := GetUniqueTags()
+	if err1 != nil {
+		panic(fmt.Errorf("Błąd pobierania tagów: %v", err1))
+	}
+	var tags, errG = geminiApi.AnalyzeSearchIntentWithGemini(context.Background(), Cfg.Gemini.ApiKey, description, currentTags)
+	if errG != nil {
+		panic(fmt.Errorf("Błąd generowania zapytania json: %v", errG))
+	}
+	var queryVector, err = geminiApi.GetEmbedding(Cfg.Gemini.ApiKey, tags.CleanQuery)
+
 	if err != nil {
 		panic(fmt.Errorf("Błąd pobierania embeddingu: %v", err))
 	}
+	query := DB.Model(&models.Dish{})
+	// 1. Filtrowanie TAGÓW (jeśli istnieją w zapytaniu)
+	if len(tags.Tags) > 0 {
+		// && oznacza: "ma przynajmniej jeden z tych tagów"
+		query = query.Where("tags && ?", pq.StringArray(tags.Tags))
+	}
+
+	if len(tags.WithoutTags) > 0 {
+		// NOT (tags && ...) oznacza: "nie ma żadnego z tych tagów"
+		query = query.Where("NOT (tags && ?)", pq.StringArray(tags.WithoutTags))
+	}
+
 	threshold := 0.4
-	err = DB.Clauses(clause.OrderBy{
+	err = query.Clauses(clause.OrderBy{
 		Expression: clause.Expr{
 			SQL:  "embedding <=> ?",
 			Vars: []interface{}{pgvector.NewVector(queryVector)},
 		},
 	}).
 		Where("embedding <=> ? < ?", pgvector.NewVector(queryVector), threshold).
-		Limit(5).Find(&dishesSearch).Error
+		Limit(10).Find(&dishesSearch).Error
 
 	if err != nil {
 		panic(fmt.Errorf("DB failed: %v", err))
 	}
 	return dishesSearch
+}
+func GetUniqueTags() ([]string, error) {
+	var tags []string
+	err := DB.Table("dishes").
+		Select("DISTINCT unnest(tags)").
+		Order("1").
+		Scan(&tags).Error
+
+	return tags, err
 }

@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/lib/pq"
 	"github.com/pgvector/pgvector-go"
 	"gorm.io/gorm"
 )
@@ -14,6 +15,7 @@ type Dish struct {
 	FileName     string          `json:"fileName"`
 	TypeDish     string          `json:"typeDish"`
 	Type         DishType        `gorm:"foreignKey:TypeDish;references:Name"`
+	Tags         pq.StringArray  `gorm:"type:text[];index:,type:gin" json:"tags"`
 	DishToppings []DishTopping   `json:"toppings"`
 	Embedding    pgvector.Vector `gorm:"type:vector(768)" json:"-"`
 }
