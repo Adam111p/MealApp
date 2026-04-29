@@ -1,38 +1,49 @@
 <div class="search-wrapper">
   <div>
-  <mat-card class="search-card">
-    <form [formGroup]="clientForm" (ngSubmit)="search()" class="modern-form">
-      <header class="form-header">
-        <h2>Znajdź coś pysznego</h2>
-        <p>Napisz, na co masz ochotę, a my zajmiemy się resztą.</p>
-      </header>
+    <mat-card class="search-card">
+      <form [formGroup]="clientForm" (ngSubmit)="search()" class="modern-form">
+        <header class="form-header">
+          <h2>Znajdź coś pysznego</h2>
+          <p>Napisz, na co masz ochotę, a my zajmiemy się resztą.</p>
+        </header>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Opisz swoje preferencje</mat-label>
-        <textarea
-          matInput
-          formControlName="descriptionQuery"
-          placeholder="np. Coś mięsnego z grillowanymi warzywami..."
-          rows="4"
-        ></textarea>
-        <mat-icon matSuffix>restaurant</mat-icon>
-        <mat-hint>Bądź tak szczegółowy, jak tylko chcesz!</mat-hint>
-      </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Opisz swoje preferencje</mat-label>
+          <textarea
+            matInput
+            formControlName="descriptionQuery"
+            placeholder="np. Coś mięsnego z grillowanymi warzywami..."
+            rows="4"
+          ></textarea>
+          <mat-icon matSuffix>restaurant</mat-icon>
+          <mat-hint>Bądź tak szczegółowy, jak tylko chcesz!</mat-hint>
+        </mat-form-field>
 
-      <div class="actions">
-        <button
-          mat-flat-button
-          color="primary"
-          type="submit"
-          [disabled]="clientForm.invalid"
-          class="search-button"
-        >
-          <mat-icon>search</mat-icon>
-          Szukaj posiłku
-        </button>
-      </div>
-    </form>
-  </mat-card>
+        <div class="actions">
+          <button
+            mat-flat-button
+            [color]="menuService.loadStatus() === LoadingStatus.Error ? 'warn' : 'primary'"
+            type="submit"
+            [disabled]="clientForm.invalid || menuService.loadStatus() == LoadingStatus.Loading"
+            class="search-button"
+          >
+            @if (menuService.loadStatus() != LoadingStatus.Loading) {
+              <mat-icon>search</mat-icon>
+            }
+            Szukaj posiłku
+            @if (menuService.loadStatus() == LoadingStatus.Loading) {
+              <mat-spinner class="spinnerAnim" diameter="24" color="accent"></mat-spinner>
+            }
+          </button>
+        </div>
+        @if (menuService.loadStatus() === LoadingStatus.Error) {
+          <div class="error-container">
+            <mat-icon color="error">error_outline</mat-icon>
+            <span>Ups! Coś poszło nie tak. Spróbuj ponownie za chwilę.</span>
+          </div>
+        }
+      </form>
+    </mat-card>
   </div>
   <div class="menu-grid">
     @for (dish of menuService.dishes(); track dish.id) {

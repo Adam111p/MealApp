@@ -9,13 +9,16 @@ import {
 
 import { MatFormField } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MenuService } from '../services/menu.service';
+import { LoadingStatus, MenuService } from '../services/menu.service';
 import type { Dish } from '../models/dish.model';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { OrderDetails } from '../components/order-details/order-details';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatButtonModule } from '@angular/material/button';
+
 
 @Component({
   selector: 'ma-search-dish',
@@ -27,17 +30,23 @@ import { MatDialog } from '@angular/material/dialog';
     MatCardModule,
     MatChipsModule,
     MatIconModule,
+    MatProgressSpinnerModule,
+    MatButtonModule,
+    MatDialogModule,
   ],
   templateUrl: './search-dish.html',
   styleUrl: './search-dish.scss',
 })
 export class SearchDish {
+protected readonly LoadingStatus = LoadingStatus;
+  [x: string]: any;
   search() {
     this.menuService.searchDishes(this.clientForm.controls['descriptionQuery'].value || '');
   }
-
+  loadingStatus = LoadingStatus.Loading;
   clientForm: FormGroup;
   query = signal<string>('');
+
   menuService = inject(MenuService);
   private dialog = inject(MatDialog);
 

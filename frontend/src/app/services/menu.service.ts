@@ -14,7 +14,8 @@ export class MenuService {
   // initialValue zapewnia, że nie dostaniemy błędu przy starcie
   menuItems = toSignal(this.http.get<Dish[]>(this.apiUrl + '/menu'), { initialValue: [] });
   spicesDict = signal<Spice[]>([]);
-  dishes = signal<Dish[] >([]);
+  dishes = signal<Dish[]>([]);
+  loadStatus = signal<LoadingStatus>(LoadingStatus.OK);
   getSpicesDictByType(type: string) {
     return this.spicesDict().filter((s) => s.typeDish === type);
   }
@@ -25,9 +26,21 @@ export class MenuService {
   }
 
   searchDishes(query: string) {
-    this.http.get<Dish[]>(this.apiUrl + '/searchDishes?query=' + query)
-    .subscribe((data) => {
-      this.dishes.set(data);
+    this.loadStatus.set(LoadingStatus.Loading);
+
+    this.http.get<Dish[]>(this.apiUrl + '/searchDishes?query=' + query).subscribe({
+      next: (data) => {
+        this.dishes.set(data);
+        this.loadStatus.set(LoadingStatus.OK);
+      },
+      error: (err) => {
+        this.loadStatus.set(LoadingStatus.Error);
+      },
     });
   }
+}
+export enum LoadingStatus {
+  OK,
+  Loading,
+  Error,
 }
