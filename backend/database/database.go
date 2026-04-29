@@ -216,19 +216,19 @@ func SearchByDesc(description string, c *gin.Context) []models.Dish {
 	// 1. Filtrowanie TAGÓW (jeśli istnieją w zapytaniu)
 	if len(tags.Tags) > 0 {
 		// && oznacza: "ma przynajmniej jeden z tych tagów"
-		query = query.Where("tags && ?", pq.StringArray(tags.Tags))
+		query = query.Where("tags @> ?", pq.StringArray(tags.Tags))
 	}
 
 	if len(tags.WithoutTags) > 0 {
 		// NOT (tags && ...) oznacza: "nie ma żadnego z tych tagów"
 		query = query.Where("NOT (tags && ?)", pq.StringArray(tags.WithoutTags))
 	}
-	searchTags := pq.StringArray(tags.Tags)
+
 	threshold := 0.6
 	err = query.Clauses(clause.OrderBy{
 		Expression: clause.Expr{
-			SQL:  `(embedding <=> ?) - (0.1 * (SELECT count(*) FROM unnest(tags) as t WHERE t = ANY(?::text[])))`,
-			Vars: []interface{}{pgvector.NewVector(queryVector), searchTags},
+			SQL:  "embedding <=> ?",
+			Vars: []interface{}{pgvector.NewVector(queryVector)},
 		},
 	}).
 		Where("embedding <=> ? < ?", pgvector.NewVector(queryVector), threshold).
