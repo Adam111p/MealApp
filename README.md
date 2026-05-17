@@ -59,7 +59,7 @@ Gdy oba serwisy są uruchomione, aplikacja dostępna jest pod adresem:
 
 * **Frontend:** Angular (TypeScript)
 * **Backend:** Golang
-* **Baza danych:** SQLite (embedded)
+* **Baza danych:** PostgreSql
 
 ---
 *Projekt przygotowany przez [Adam111p](https://github.com/Adam111p)*
