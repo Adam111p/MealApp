@@ -11,14 +11,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { BasketDetails } from './components/basket-details/basket-details';
 @Component({
   selector: 'ma-root',
-  imports: [
-    RouterOutlet,
-    MenuList,
-    MatToolbarModule,
-    MatIconModule,
-    MatButtonModule,
-    MatBadgeModule,
-  ],
+  imports: [RouterOutlet, MatToolbarModule, MatIconModule, MatButtonModule, MatBadgeModule],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
