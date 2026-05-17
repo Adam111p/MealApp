@@ -8,7 +8,7 @@ Aplikacja MealApp to kompletny system typu Fullstack. Frontend zarządza interfe
 
 **Kluczowe cechy:**
 * **Architektura:** Rozdzielenie warstwy prezentacji (Angular) od logiki serwerowej (Go).
-* **Baza danych:** Wykorzystanie SQLite (przepisane w Go), co eliminuje konieczność instalacji zewnętrznych silników baz danych.
+* **Baza danych:** Wykorzystanie PostgreSql , pierwotnie było SqlLite dla celóœ testowych.
 * **Autoinicjalizacja:** Serwis przy starcie sam tworzy niezbędną strukturę bazy danych.
 
 ---
